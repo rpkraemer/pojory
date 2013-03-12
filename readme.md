@@ -85,11 +85,11 @@ So, what can we do? =/
 
 Pojory help us providing a mechanism to "merge"(or combine) different defined traits. So, we can obtain a default user "enhanced" with admin stuff:
 
-	 User adminUser = Pojory.pojory(User.class).traits("default", "active").getOne();
+	 User adminUser = Pojory.pojory(User.class).traits("default", "admin").getOne();
 	 
 or, if we want a list:
 
-	List<User> adminUsers = Pojory.pojory(User.class).traits("default", "active").getList(5);
+	List<User> adminUsers = Pojory.pojory(User.class).traits("default", "admin").getList(5);
 	
 Hope you enjoy it! =D
 
