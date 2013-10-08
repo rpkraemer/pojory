@@ -1,11 +1,14 @@
 package br.com.rpk.pojory;
 
 import static br.com.rpk.pojory.Pojory.pojory;
-import static org.junit.Assert.*;
+import static br.com.rpk.pojory.TraitHelperMethods.random;
+import static br.com.rpk.pojory.TraitHelperMethods.range;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
 import org.junit.Test;
-import br.com.rpk.pojory.Pojory;
-import br.com.rpk.pojory.Trait;
 
 public class PojoryTest {
 
@@ -302,6 +305,37 @@ public class PojoryTest {
 		assertTrue("Must be active user", activeUsers.get(1).isActive());
 		assertTrue("Must be active user", activeUsers.get(2).isActive());
 	}
+	
+	@Test
+	public void shouldConstructAPojoComposedOfOtherPojo() {
+		Pojory.define(User.class,
+			new Trait("default") {
+				public void definitions(Object obj) {
+					User user = (User) obj;
+					user.setActive(true);
+					user.setAdmin(false);
+					user.setName("Default User" + random(range(1, 1000)));
+					user.setAddress("Rua cba, 715, Passo Fundo - RS");
+				}
+			},
+			new Trait("valid") {
+				public void definitions(Object obj) {
+					User user = (User) obj;
+					user.setActive(true);
+					user.setAdmin(random(true, false));
+					user.setName("Valid User" + random(range(1, 1000)));
+					user.setAddress("Rua abc, 75, Passo Fundo - RS");
+					
+					List<User> users = pojory(User.class).trait("default").getList(3);
+					user.setUsers(users);
+				}
+			}
+		);
+		
+		User user = pojory(User.class).trait("valid").getOne();
+		assertTrue(user.getName().startsWith("Valid User"));
+		assertEquals(3, user.getUsers().size());
+	}
 }
 
 	
@@ -313,6 +347,7 @@ class User {
 	private boolean admin;
 	private String address;
 	private boolean active;
+	private List<User> users;
 	
 	public String getName() {
 		return name;
@@ -337,6 +372,17 @@ class User {
 	}
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+	public List<User> getUsers() {
+		return users;
+	}
+	public void setUsers(List<User> users) {
+		this.users = users;
+	}
+	
+	public String toString() {
+		return getName() + " - " + getAddress() + " - " + 
+			   isActive() + " - " + isAdmin() + " - " + getUsers();
 	}
 }
 
