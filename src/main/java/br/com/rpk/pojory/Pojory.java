@@ -1,37 +1,29 @@
 package br.com.rpk.pojory;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Pojory {
 
-	static private Map<Class<?>, List<Trait>> definitions = new HashMap<Class<?>, List<Trait>>();
+	static private Map<Class<?>, PojoDefinitions<?>> definitions = new HashMap<Class<?>, PojoDefinitions<?>>();
 	
-	static public void define(Class<?> clazz, Trait trait) {
-		List<Trait> clazzTraits = definitions.get(clazz);
-		if (clazzTraits == null) {
-			clazzTraits = new ArrayList<Trait>();
+	static public <T> PojoDefiner<T> define(Class<T> pojo) {
+		PojoDefinitions<T> pojoDefinitions = getDefinitions(pojo);
+		return new PojoDefiner<T>(pojoDefinitions);
+	}
+	
+	static public <T> PojoRequester<T> pojo(Class<T> pojo) {
+		PojoDefinitions<T> pojoDefinitions = getDefinitions(pojo);
+		return new PojoRequester<T>(pojo, pojoDefinitions);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static <T> PojoDefinitions<T> getDefinitions(Class<T> pojo) {
+		PojoDefinitions<T> pojoDefinitions = (PojoDefinitions<T>) definitions.get(pojo);
+		if (pojoDefinitions == null) {
+			pojoDefinitions = new PojoDefinitions<T>(pojo);
+			definitions.put(pojo, pojoDefinitions);
 		}
-		clazzTraits.add(trait);
-		definitions.put(clazz, clazzTraits);
-	}
-	
-	static public void define(Class<?> clazz, Trait ...traits) {
-		for (Trait t : traits)
-			define(clazz, t);
-	}
-	
-	static public PojoryFactory pojory(Class<?> clazz) {
-		return new PojoryFactory(clazz, getClazzTraits(clazz));
-	}
-
-	private static List<Trait> getClazzTraits(Class<?> clazz) throws IllegalStateException {
-		List<Trait> clazzTraits = definitions.get(clazz);
-		if (clazzTraits == null) {
-			throw new IllegalStateException("There isn't traits for given class");
-		}
-		return clazzTraits;
+		return pojoDefinitions;
 	}
 }
